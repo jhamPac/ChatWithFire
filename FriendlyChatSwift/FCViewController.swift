@@ -113,7 +113,6 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
 
   func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
     guard let text = textField.text else { return true }
-    print(range.length)
     let newLength = text.utf16.count + string.utf16.count - range.length
     return newLength <= self.msglength.integerValue // Bool
     
