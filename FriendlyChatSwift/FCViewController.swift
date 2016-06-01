@@ -113,11 +113,12 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
 
   func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
     guard let text = textField.text else { return true }
-
+    print(range.length)
     let newLength = text.utf16.count + string.utf16.count - range.length
     return newLength <= self.msglength.integerValue // Bool
+    
   }
-
+    
   // UITableViewDataSource protocol methods
   func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
   {
@@ -156,9 +157,13 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
   {
     var mdata = data
     mdata[Constants.MessageFields.name] = AppState.sharedInstance.displayName
-    if let photoUrl = AppState.sharedInstance.photoUrl {
+    if let photoUrl = AppState.sharedInstance.photoUrl
+    {
       mdata[Constants.MessageFields.photoUrl] = photoUrl.absoluteString
     }
+    
+    self.ref.child("messages").childByAutoId().setValue(mdata)
+    self.textField.text = ""
   }
 
   // MARK: - Image Picker
