@@ -34,7 +34,7 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
   @IBOutlet weak var textField: UITextField!
   @IBOutlet weak var sendButton: UIButton!
   var ref: FIRDatabaseReference!
-  var messages: [FIRDataSnapshot]! = []
+  var messages = [FIRDataSnapshot]()
   var msglength: NSNumber = 10
   private var _refHandle: FIRDatabaseHandle!
 
@@ -69,6 +69,13 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
             self.messages.append(snapshot)
             self.clientTable.insertRowsAtIndexPaths([NSIndexPath(forRow: self.messages.count - 1, inSection: 0 )], withRowAnimation: .Automatic)
         })
+    }
+    
+    override func viewWillDisappear(animated: Bool)
+    {
+        super.viewWillDisappear(animated)
+        
+        self.ref.removeObserverWithHandle(_refHandle)
     }
 
   deinit {
@@ -112,25 +119,41 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
   }
 
   // UITableViewDataSource protocol methods
-  func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+  func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
+  {
     return messages.count
   }
 
-  func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+  func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
+  {
     // Dequeue cell
     let cell: UITableViewCell! = self.clientTable.dequeueReusableCellWithIdentifier("tableViewCell", forIndexPath: indexPath)
-
-    return cell!
+    let messageSnapShot: FIRDataSnapshot! = self.messages[indexPath.row]
+    let message = messageSnapShot.value as! [String: String]
+    let name = message[Constants.MessageFields.name] as String!
+    let text = message[Constants.MessageFields.text] as String!
+    
+    cell.textLabel?.text = "\(name): \(text)"
+    cell.imageView?.image = UIImage(named: "ic_account_circle")
+    
+    if let photoURL = message[Constants.MessageFields.photoUrl], url = NSURL(string: photoURL), data = NSData(contentsOfURL: url)
+    {
+        cell.imageView?.image = UIImage(data: data)
+    }
+    
+    return cell
   }
 
   // UITextViewDelegate protocol methods
-  func textFieldShouldReturn(textField: UITextField) -> Bool {
+  func textFieldShouldReturn(textField: UITextField) -> Bool
+  {
     let data = [Constants.MessageFields.text: textField.text! as String]
     sendMessage(data)
     return true
   }
 
-  func sendMessage(data: [String: String]) {
+  func sendMessage(data: [String: String])
+  {
     var mdata = data
     mdata[Constants.MessageFields.name] = AppState.sharedInstance.displayName
     if let photoUrl = AppState.sharedInstance.photoUrl {
@@ -140,7 +163,8 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
 
   // MARK: - Image Picker
 
-  @IBAction func didTapAddPhoto(sender: AnyObject) {
+  @IBAction func didTapAddPhoto(sender: AnyObject)
+  {
     let picker = UIImagePickerController()
     picker.delegate = self
     if (UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)) {

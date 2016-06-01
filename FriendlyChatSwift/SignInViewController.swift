@@ -60,7 +60,7 @@ class SignInViewController: UIViewController
         FIRAuth.auth()?.createUserWithEmail(email, password: password) { [unowned self] (user, error) -> Void in
             if let error = error
             {
-                print(error.localizedDescription)
+                print(error.description)
                 return
             }
             
