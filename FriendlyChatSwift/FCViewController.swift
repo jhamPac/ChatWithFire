@@ -78,19 +78,29 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
         self.ref.removeObserverWithHandle(_refHandle)
     }
 
-  deinit {
+  deinit
+  {
+    
   }
 
-  func configureDatabase() {
+  func configureDatabase()
+  {
+    
   }
 
-  func configureStorage() {
+  func configureStorage()
+  {
+    storageRef = FIRStorage.storage().referenceForURL("gs://friendlychat-32be4.appspot.com")
   }
 
-  func configureRemoteConfig() {
+  func configureRemoteConfig()
+  {
+    
   }
 
-  func fetchConfig() {
+  func fetchConfig()
+  {
+    
   }
 
   @IBAction func didPressFreshConfig(sender: AnyObject) {

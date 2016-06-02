@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "1A276970D617A8DEC9E7C07C21485CEEDFA006B0",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "B620AB8EFCBFE4593197E74E73CBC5F62F264497" : 0,
+    "1A276970D617A8DEC9E7C07C21485CEEDFA006B0" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "37D0FCC3-5985-4A29-B6CC-0F4F14F7C543",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "B620AB8EFCBFE4593197E74E73CBC5F62F264497" : "..\/HelpfulCode",
+    "1A276970D617A8DEC9E7C07C21485CEEDFA006B0" : "FireChat\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "FriendlyChatSwift",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "FriendlyChatSwift.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:jhamPac\/ChatWithFire.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "1A276970D617A8DEC9E7C07C21485CEEDFA006B0"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "bitbucket.org:jhampac\/helpful_code_stuff.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "B620AB8EFCBFE4593197E74E73CBC5F62F264497"
+    }
+  ]
+}
