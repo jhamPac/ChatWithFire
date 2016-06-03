@@ -148,7 +148,9 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
                     return
                 }
                 
-                cell.imageView?.image = UIImage(data: data!)
+                let image = UIImage(data: data!)
+                cell.imageView?.image = image
+                cell.setNeedsLayout()
             }
         }
         // the image may be on the phone but no gs:// in front of it
@@ -235,8 +237,6 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
     let component = referenceUrl.lastPathComponent!
     let filePath = "\(userID!)/\(timeStamp)/\(component)"
             
-    print(filePath)
-            
     let metadata = FIRStorageMetadata()
             
     metadata.contentType = "image/jpeg"
@@ -247,7 +247,6 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
             print("Error uploading: \(error.description)")
             return
         }
-            print(self.storageRef.child((metadata?.path!)!).description)
             self.sendMessage([Constants.MessageFields.imageUrl: self.storageRef.child((metadata?.path)!).description])
         }
     })
