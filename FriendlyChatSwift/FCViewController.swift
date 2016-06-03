@@ -148,8 +148,7 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
                     return
                 }
                 
-                let image = UIImage(data: data!)
-                cell.imageView?.image = image
+                cell.imageView?.image = UIImage(data: data!)
                 cell.setNeedsLayout()
             }
         }
