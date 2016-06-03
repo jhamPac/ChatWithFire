@@ -60,17 +60,6 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
     logViewLoaded()
   }
     
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        self.messages.removeAll()
-        
-        _refHandle = self.ref.child("messages").observeEventType(.ChildAdded, withBlock: { [unowned self] (snapshot) -> Void in
-            self.messages.append(snapshot)
-            self.clientTable.insertRowsAtIndexPaths([NSIndexPath(forRow: self.messages.count - 1, inSection: 0 )], withRowAnimation: .Automatic)
-        })
-    }
-    
     override func viewWillDisappear(animated: Bool)
     {
         super.viewWillDisappear(animated)
@@ -85,7 +74,11 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
 
   func configureDatabase()
   {
-    
+    ref = FIRDatabase.database().reference()
+    _refHandle = self.ref.child("messages").observeEventType(.ChildAdded, withBlock: { [unowned self] (snapshot) -> Void in
+        self.messages.append(snapshot)
+        self.clientTable.insertRowsAtIndexPaths([NSIndexPath(forRow: self.messages.count - 1, inSection: 0 )], withRowAnimation: .Automatic)
+        })
   }
 
   func configureStorage()
@@ -211,10 +204,13 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
   {
     let picker = UIImagePickerController()
     picker.delegate = self
-    if (UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)) {
-      picker.sourceType = UIImagePickerControllerSourceType.Camera
-    } else {
-      picker.sourceType = UIImagePickerControllerSourceType.PhotoLibrary
+    if (UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera))
+    {
+      picker.sourceType = .Camera
+    }
+    else
+    {
+      picker.sourceType = .PhotoLibrary
     }
 
     presentViewController(picker, animated: true, completion:nil)
@@ -223,26 +219,39 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
   func imagePickerController(picker: UIImagePickerController,
     didFinishPickingMediaWithInfo info: [String : AnyObject])
   {
-      picker.dismissViewControllerAnimated(true, completion:nil)
-
-    // if it's a photo from the library, not an image from the camera
-    if #available(iOS 8.0, *), let referenceUrl = info[UIImagePickerControllerReferenceURL]
-    {
-      let assets = PHAsset.fetchAssetsWithALAssetURLs([referenceUrl as! NSURL], options: nil)
-      let asset = assets.firstObject
-      asset?.requestContentEditingInputWithOptions(nil, completionHandler: { (contentEditingInput, info) in
-        let imageFile = contentEditingInput?.fullSizeImageURL
-        let filePath = "\(FIRAuth.auth()?.currentUser?.uid)/\(Int(NSDate.timeIntervalSinceReferenceDate() * 1000))/\(referenceUrl.lastPathComponent!)"
-      })
-    }
+    picker.dismissViewControllerAnimated(true, completion:nil)
     
-    else
-    {
-      let image = info[UIImagePickerControllerOriginalImage] as! UIImage
-      let imageData = UIImageJPEGRepresentation(image, 0.8)
-      let imagePath = FIRAuth.auth()!.currentUser!.uid +
-        "/\(Int(NSDate.timeIntervalSinceReferenceDate() * 1000)).jpg"
-    }
+    
+    let referenceUrl = info[UIImagePickerControllerReferenceURL] as! NSURL
+    let assets = PHAsset.fetchAssetsWithALAssetURLs([referenceUrl], options: nil)
+    let asset = assets.firstObject
+    
+    asset?.requestContentEditingInputWithOptions(nil, completionHandler: { [unowned self] (contentEditingInput, info) -> Void in
+    let imageFile = contentEditingInput?.fullSizeImageURL
+    
+    // build up a file string
+    let userID = FIRAuth.auth()?.currentUser?.uid
+    let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate() * 1000)
+    let component = referenceUrl.lastPathComponent!
+    let filePath = "\(userID!)/\(timeStamp)/\(component)"
+            
+    print(filePath)
+            
+    let metadata = FIRStorageMetadata()
+            
+    metadata.contentType = "image/jpeg"
+            
+    self.storageRef.child(filePath).putFile(imageFile!, metadata: metadata) { [unowned self] (metadata, error) -> Void in
+        if let error = error
+        {
+            print("Error uploading: \(error.description)")
+            return
+        }
+            print(self.storageRef.child((metadata?.path!)!).description)
+            self.sendMessage([Constants.MessageFields.imageUrl: self.storageRef.child((metadata?.path)!).description])
+        }
+    })
+        
   }
 
   func imagePickerControllerDidCancel(picker: UIImagePickerController) {
