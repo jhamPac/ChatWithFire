@@ -142,14 +142,43 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
     let messageSnapShot: FIRDataSnapshot! = self.messages[indexPath.row]
     let message = messageSnapShot.value as! [String: String]
     let name = message[Constants.MessageFields.name] as String!
-    let text = message[Constants.MessageFields.text] as String!
     
-    cell.textLabel?.text = "\(name): \(text)"
-    cell.imageView?.image = UIImage(named: "ic_account_circle")
-    
-    if let photoURL = message[Constants.MessageFields.photoUrl], url = NSURL(string: photoURL), data = NSData(contentsOfURL: url)
+    if let imageUrl = message[Constants.MessageFields.imageUrl]
     {
-        cell.imageView?.image = UIImage(data: data)
+        // the image is in FIRStorage
+        if imageUrl.hasPrefix("gs://")
+        {
+            FIRStorage.storage().referenceForURL(imageUrl).dataWithMaxSize(INT64_MAX) { (data, error) -> Void in
+                if let error = error
+                {
+                    print("Error downloading image \(error)")
+                    return
+                }
+                
+                cell.imageView?.image = UIImage(data: data!)
+            }
+        }
+        // the image may be on the phone but no gs:// in front of it
+        else if let url = NSURL(string: imageUrl), data = NSData(contentsOfURL: url)
+        {
+            cell.imageView?.image = UIImage(data: data)
+        }
+        
+        // either way its an image so the text is sent by
+        cell.textLabel?.text = "sent by: \(name)"
+    }
+    // this means its not an image but instead a text
+    else
+    {
+        let text = message[Constants.MessageFields.text] as String!
+        cell.textLabel?.text = "\(name): \(text)"
+        cell.imageView?.image = UIImage(named: "ic_account_circle")
+        
+        if let photoUrl = message[Constants.MessageFields.photoUrl], url = NSURL(string: photoUrl), data = NSData(contentsOfURL: url)
+        {
+            cell.imageView?.image = UIImage(data: data)
+        }
+        
     }
     
     return cell
