@@ -58,6 +58,8 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
     fetchConfig()
     loadAd()
     logViewLoaded()
+    
+    FIRCrashMessage("View Loaded")
   }
     
     override func viewWillDisappear(animated: Bool)
@@ -66,11 +68,6 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
         
         self.ref.removeObserverWithHandle(_refHandle)
     }
-
-  deinit
-  {
-    
-  }
 
   func configureDatabase()
   {
@@ -88,30 +85,61 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
 
   func configureRemoteConfig()
   {
+    remoteConfig = FIRRemoteConfig.remoteConfig()
+    
+    let remoteConfigSettings = FIRRemoteConfigSettings(developerModeEnabled: true)
+    remoteConfig.configSettings = remoteConfigSettings!
     
   }
 
   func fetchConfig()
   {
+    var expirationDate: Double = 3600
     
+    if remoteConfig.configSettings.isDeveloperModeEnabled
+    {
+        expirationDate = 0
+    }
+    
+    remoteConfig.fetchWithExpirationDuration(expirationDate) { [unowned self] (status, error) -> Void in
+        if status == .Success
+        {
+            self.remoteConfig.activateFetched()
+            self.msglength = self.remoteConfig["message_length"].numberValue!
+        }
+        else
+        {
+            print(error?.localizedDescription)
+        }
+    }
   }
 
-  @IBAction func didPressFreshConfig(sender: AnyObject) {
+  @IBAction func didPressFreshConfig(sender: AnyObject)
+  {
     fetchConfig()
   }
 
-  @IBAction func didSendMessage(sender: UIButton) {
+  @IBAction func didSendMessage(sender: UIButton)
+  {
     textFieldShouldReturn(textField)
   }
 
-  @IBAction func didPressCrash(sender: AnyObject) {
+  @IBAction func didPressCrash(sender: AnyObject)
+  {
+    FIRCrashMessage("Cause Crash button clicked")
     fatalError()
   }
 
-  func logViewLoaded() {
+  func logViewLoaded()
+  {
+    
   }
 
-  func loadAd() {
+  func loadAd()
+  {
+    self.banner.adUnitID = kBannerAdUnitID
+    self.banner.rootViewController = self
+    self.banner.loadRequest(GADRequest())
   }
 
   func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool
@@ -195,6 +223,7 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
       mdata[Constants.MessageFields.photoUrl] = photoUrl.absoluteString
     }
     
+    MeasurementHelper.sendMessageEvent()
     self.ref.child("messages").childByAutoId().setValue(mdata)
     self.textField.text = ""
   }
@@ -221,7 +250,6 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
     didFinishPickingMediaWithInfo info: [String : AnyObject])
   {
     picker.dismissViewControllerAnimated(true, completion:nil)
-    
     
     let referenceUrl = info[UIImagePickerControllerReferenceURL] as! NSURL
     let assets = PHAsset.fetchAssetsWithALAssetURLs([referenceUrl], options: nil)
@@ -262,6 +290,7 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
     do
     {
         try FIRAuth.auth()?.signOut()
+        MeasurementHelper.sendLogoutEvent()
         AppState.sharedInstance.signedIn = false
         performSegueWithIdentifier(Constants.Segues.FpToSignIn, sender: nil)
     }
