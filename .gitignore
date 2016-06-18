@@ -23,6 +23,8 @@ xcuserdata/
 ## Other
 *.moved-aside
 *.xcuserstate
+keys.plist
+GoogleService-Info.plist
 
 ## Obj-C/Swift specific
 *.hmap
